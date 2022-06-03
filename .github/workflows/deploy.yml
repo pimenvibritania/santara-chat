@@ -1,0 +1,43 @@
+name: Main
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  SERVICE: chatdev # google run service name
+  REGION: asia-southeast2
+
+on: # When do you want it to run
+  push: # When pushed to master branch
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs: # Define jobs to run
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      # Sets up the gcloud cli with the credentials we previously created, and will be storing within Github as secrets.
+      - name: Setup Cloud cli
+        uses: google-github-actions/setup-gcloud@v0.2.0
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+        # Configure Docker with Credentials
+      - name: Authorize Docker push
+        run: gcloud auth configure-docker
+
+      - name: Build and Push Container
+        run: |-
+          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} .
+          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
+      - name: Deploy to Cloud Run
+        id: chatdev
+        uses: google-github-actions/deploy-cloudrun@v0.4.0
+        with:
+          service: ${{ env.SERVICE }}
+          image: gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
+          region: ${{ env.REGION }}
+
+      - name: Show Output
+        run: echo ${{ steps.chatdev.outputs.url }}
