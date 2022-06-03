@@ -9,6 +9,7 @@
     <meta name="description" content="@yield('title') - {{getAppName()}}">
     <meta name="keyword" content="CoreUI,Bootstrap,Admin,Template,InfyOm,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <!-- Bootstrap 4.1.3 -->
     <link rel="stylesheet" href="{{ mix('assets/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.min.css">
